@@ -24,7 +24,7 @@ app.get("/", (req, res) => {
 
 app.post("/api", async (req, res) => {
   const { userText, rhyme } = req.body;
-  const origin = req.headers.origin;
+  const origin = req.headers.origin.substring(8);
 
   if (origin === process.env.ORIGIN) {
     try {
