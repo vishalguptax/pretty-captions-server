@@ -42,6 +42,7 @@ app.post("/api", async (req, res) => {
       res.status(500).json(error?.response.data.error.message);
     }
   } else {
+    console.log(req.headers.origin)
     res.status(401).send("Please don't try to be smart! 🙂");
   }
 });
