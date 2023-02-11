@@ -17,8 +17,10 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 app.get("/", (req, res) => {
-  res.send("Hello");
+  res.send("Looking something? 😄");
 });
+
+
 
 app.post("/api", async (req, res) => {
   const { userText, rhyme } = req.body;
