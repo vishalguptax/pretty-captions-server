@@ -10,6 +10,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+res.set("Access-Control-Allow-Origin", "https://p-captions.web.app/");
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -24,9 +25,9 @@ app.get("/", (req, res) => {
 
 app.post("/api", async (req, res) => {
   const { userText, rhyme } = req.body;
-  const origin = req.headers.origin.substring(8);
+  // const origin = req.headers.origin.substring(8);
 
-  if (origin === process.env.ORIGIN) {
+  if (userText !== "") {
     try {
       const completion = await openai.createCompletion({
         model: "text-davinci-002",
