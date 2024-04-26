@@ -1,53 +1,47 @@
 import express from "express";
-import * as dotenv from "dotenv";
+
+import dotenv from "dotenv";
+
 import cors from "cors";
-import { Configuration, OpenAIApi } from "openai";
+
+import { getGPTResponse } from "./utils/gpt-req.js";
+
 dotenv.config();
 
-const PORT = 8080 || process.env.PORT;
-
+const PORT = process.env.PORT || 8080;
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-res.set("Access-Control-Allow-Origin", "https://p-captions.web.app/");
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
-
-app.get("/", (req, res) => {
-  res.send("Looking something? 😄");
+app.use("/api", (_req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "https://p-captions.web.app");
+  next();
 });
 
-
+app.get("/", (_req, res) => {
+  res.send("Looking for something? 😄");
+});
 
 app.post("/api", async (req, res) => {
   const { userText, rhyme } = req.body;
-  // const origin = req.headers.origin.substring(8);
 
-  if (userText !== "") {
-    try {
-      const completion = await openai.createCompletion({
-        model: "text-davinci-002",
-        prompt: `create a ${
-          rhyme ? "rhyming caption" : "caption"
-        } for "${userText}." for social media`,
-        max_tokens: 100,
-      });
-      const generatedCaption = completion.data.choices[0].text;
-      res.status(200).json({ data: generatedCaption });
-    } catch (error) {
-      console.log(error);
-      res.status(500).json(error?.response.data.error.message);
-    }
-  } else {
-    console.log(req.headers.origin)
-    res.status(401).send("Please don't try to be smart! 🙂");
+  if (!userText) {
+    return res.status(400).send("Please provide text for caption generation.");
+  }
+
+  try {
+    const response = await getGPTResponse(userText, rhyme);
+    const generatedCaption = response?.data?.choices[0]?.message?.content;
+    res.status(200).json({ data: generatedCaption });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while generating the caption." });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Pretty Caption server is running on port: ${PORT})`);
+  console.log(`Pretty Caption server is running on port: ${PORT}`);
 });
